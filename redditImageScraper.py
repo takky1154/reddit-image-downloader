@@ -1,28 +1,22 @@
-modules = ['shutil', 'requests', 'bob', 'bhjb']
-def importModules():
-    for i in modules:
-        try:
-            import i
-        except ImportError:
-                print('{} must be installed. Please run pip install {}'.format(i, i))
-            
 import shutil
-#try:
-#    import requests
-#except ImportError:
-#    print("Requests module required. Please run: pip install requests")
-#url = input("Please enter subreddit url: ")
-
-def makeUrl(afterID):
-        newUrl = url.split('/.json')[0] + "/.json?after={}".format(afterID)
-        return newUrl
+from sys import exit
+try:
+    import requests
+except ImportError:
+    print('Requests must be installed. PLease run: pip install requests')
+    exit()
     
 
-# subJson just means the json data of the subreddit
+def makeUrl(afterID, subreddit):
+        newUrl = subreddit.split('/.json')[0] + "/.json?after={}".format(afterID)
+        return newUrl
+    
 
 def splitUrl(imageUrl):
         if 'jpg' or 'webm' or 'mp4' or 'gif' or 'gifv' or 'png' in imageUrl:
             return imageUrl.split('/')[-1]  # Returns filename
+
+
 def downloadImage(imageUrl, imageAmount):  # Function to download the images from
                                 # each url passed to it
         filename = splitUrl(imageUrl)
@@ -36,15 +30,15 @@ def downloadImage(imageUrl, imageAmount):  # Function to download the images fro
 
 
 def run():
-    
+    subreddit = input("Please enter subreddit url in the form of \"https://www.reddit.com/r/sub\": ")
     limit = int(input("How many images would you like to download: "))
     subJson = ''
     x = 0
     while x < limit:
         if subJson:
-            url = makeUrl(subJson['data']['after'])
+            url = makeUrl(subJson['data']['after'], subreddit)
         else:
-            url = makeUrl('')
+            url = makeUrl('', subreddit)
         subJson = requests.get(url, headers={'User-Agent': 'MyRedditScraper'}).json()
         post = subJson['data']['children']
         postCount = range(len(post))
@@ -54,11 +48,8 @@ def run():
             imageUrl = (post[i]['data']['url'])
             _imageUrls = []
             _imageUrls.append(imageUrl)
-            print(x)
             x = downloadImage(_imageUrls[0], x)
             if x == limit:
                 break
 
-# Prints the links to the image in the post
-importModules()
 run()
